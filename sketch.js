@@ -241,7 +241,7 @@ playButton.addEventListener("click",function(){
     }
 });
 
-resetButton.addEventListener("click", function(){
+function reset(){
     let degrees = parseFloat(initTheta1.value);
     if (!isNaN(degrees)) {
         theta1 = degrees * (Math.PI / 180);
@@ -261,25 +261,21 @@ resetButton.addEventListener("click", function(){
         chart.data.labels = [];
         chart.data.datasets[0].data = [];
         chart.update();
+}
+
+resetButton.addEventListener("click", function(){
+        reset();
     });
 });
 
 initTheta1.addEventListener("input", function() {
-    let degrees = parseFloat(initTheta1.value);
-    if (!isNaN(degrees)) {
-        theta1 = degrees * (Math.PI / 180);
-        omega1 = 0;
-        omega2 = 0;
-    }
+    reset();
 });
 
 initTheta2.addEventListener("input", function() {
-    let degrees = parseFloat(initTheta2.value);
-    if (!isNaN(degrees)) {
-        theta2 = degrees * (Math.PI / 180);
-        omega1 = 0;
-        omega2 = 0;
-    }
+    reset();
 });
+
+
 
 loop();
