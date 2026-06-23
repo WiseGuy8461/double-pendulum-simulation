@@ -261,11 +261,11 @@ function reset(){
         chart.data.labels = [];
         chart.data.datasets[0].data = [];
         chart.update();
+    });
 }
 
 resetButton.addEventListener("click", function(){
         reset();
-    });
 });
 
 initTheta1.addEventListener("input", function() {
