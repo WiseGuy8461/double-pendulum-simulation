@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Lagrangian Double Pendulum</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #a4dde1;
+            color: #000000;
+            font-family: sans-serif;
+        }
+        .simulation-row {
+            display: flex;
+            flex-direction: row; 
+            align-items: flex-start;
+            gap: 40px;
+        }
+        .control-box {
+            display: flex;
+            flex-direction: column; 
+            gap: 20px;
+            background-color: #ff4343;
+            padding: 25px;
+            border-radius: 0px;
+            border: 2px solid white;
+            min-width: 250px;
+        }
+        .control-box label {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .control-box h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        .control-box button {
+            padding: 10px;
+            background-color: #e0e0e0;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .control-box button:hover {
+            background-color: #d0d0d0; /* Darkens slightly when hovered */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="simulation-row">
+        <canvas id="pendulumCanvas" width="500" height="600"></canvas>
+
+        
+        
+        <div class="control-box">
+            <h3>Simulation Controls</h3>
+            <label>Theta1 Starting Angle(deg):<input type="number" id="initTheta1" min="-180" max="180" value="45"></label>
+            <label>Theta2 Starting Angle(deg):<input type="number" id="initTheta2" min="-180" max="180" value="45"></label>
+            <button id="playButton">Play</button>
+            <button id="resetButton">Reset Simulation</button>
+            <label>
+                <span id="length1Text">Length 1(m): 1</span>
+                <input type="range" id="length1Slider" min="0.5" max="6" step="0.5" value="1">
+            </label>
+
+            <label>
+                <span id="length2Text">Length 2(m): 1</span>
+                <input type="range" id="length2Slider" min="0.5" max="6" step="0.5" value="1">
+            </label>
+
+            <label>
+                <span id="massText">Mass(kg): 5</span>
+                <input type="range" id="massSlider" min="1" max="50" step="1" value="5">
+            </label>
+        </div>
+        <div class="graphs">
+            <div style="width: 300px; height: 175px; margin-top: 0px;">
+                <canvas id="KEGraph"></canvas>
+            </div>
+            <div style="width: 300px; height: 175px; margin-top: 0px;">
+                <canvas id="PEGraph"></canvas>
+            </div>
+            <div style="width: 300px; height: 175px; margin-top: 0px;">
+                <canvas id="TotalEGraph"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="sketch.js"></script>
+</body>
+</html>
