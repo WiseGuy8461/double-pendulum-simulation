@@ -64,6 +64,7 @@ const KEChart = new Chart(KECtx, {
         }
     }
 });
+
 const PEChart = new Chart(PECtx, {
     type: 'line',
     data: {
@@ -106,7 +107,8 @@ const TotalEChart = new Chart(TotalECtx, {
         maintainAspectRatio: false,
         animation: false,
         scales: {
-            x: { display: false,
+            x: { 
+                display: false,
                 type: "linear",
                 min: 0
             },
@@ -132,7 +134,7 @@ function loop(){
         theta2 = theta2 + omega2 * dt;
 
         const vx = omega1*length1*Math.cos(theta1)+omega2*length2*Math.cos(theta2);
-        const vy = -1*omega1*length1*Math.sin(theta1)-omega2*length2*Math.sin(theta2);
+        const vy = omega1*length1*Math.sin(theta1)+omega2*length2*Math.sin(theta2);
         KE = 0.5*mass2*(vx*vx+vy*vy);
 
         PE = mass2*g*(length1*(1-Math.cos(theta1))+length2*(1-Math.cos(theta2)));
@@ -145,7 +147,6 @@ function loop(){
             KEChart.data.labels.shift();
             KEChart.data.datasets[0].data.shift();
         }
-
         KEChart.update();
 
         PEChart.data.labels.push(timeStepCounter);
@@ -155,18 +156,15 @@ function loop(){
             PEChart.data.labels.shift();
             PEChart.data.datasets[0].data.shift();
         }
-
         PEChart.update();
 
         TotalEChart.data.datasets[0].data.push({
             x: timeStepCounter,
             y: KE + PE
         });
-
         TotalEChart.update();
-
-        
     }
+    
     const x = Math.floor(100*(length1*Math.sin(theta1)+length2*Math.sin(theta2)))/100;
     const y = Math.floor(100*(length1*(1-Math.cos(theta1))+length2*(1-Math.cos(theta2))))/100;
 
@@ -175,9 +173,8 @@ function loop(){
     const p1x = pivotx+length1*scale*Math.sin(theta1);
     const p1y = pivoty+length1*scale*Math.cos(theta1);
 
-    const p2x =p1x+length2*scale*Math.sin(theta2);
+    const p2x = p1x+length2*scale*Math.sin(theta2);
     const p2y = p1y+length2*scale*Math.cos(theta2);
-
 
     ctx.beginPath();
     ctx.fillStyle = "#ff0000";
@@ -218,7 +215,7 @@ function loop(){
 function calcAcceleration(){
     const A = (mass1+mass2)*length1*length1;
     const B = mass2*length1*length2*Math.cos(theta1-theta2);
-    const C  = B;
+    const C = B;
     const D = mass2*length2*length2;
     
     const X = -1*(mass1+mass2)*g*length1*Math.sin(theta1)-mass2*length1*length2*omega2*omega2*Math.sin(theta1-theta2);
@@ -254,7 +251,6 @@ function reset(){
     
     omega1 = 0;
     omega2 = 0;
-
     timeStepCounter = 0;
 
     [KEChart, PEChart, TotalEChart].forEach(chart => {
@@ -265,7 +261,7 @@ function reset(){
 }
 
 resetButton.addEventListener("click", function(){
-        reset();
+    reset();
 });
 
 initTheta1.addEventListener("input", function() {
@@ -275,7 +271,5 @@ initTheta1.addEventListener("input", function() {
 initTheta2.addEventListener("input", function() {
     reset();
 });
-
-
 
 loop();
