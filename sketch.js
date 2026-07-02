@@ -23,7 +23,7 @@ let length1;
 let length2;
 const mass1 = 0.01;
 let mass2;
-const dt = 0.01;
+const dt = 0.001;
 const scale = 100;
 
 let theta1 = Math.PI/4;
