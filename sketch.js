@@ -8,11 +8,13 @@ const resetButton = document.getElementById("resetButton");
 
 const length1Slider = document.getElementById("length1Slider");
 const length2Slider = document.getElementById("length2Slider");
-const massSlider = document.getElementById("massSlider");
+const mass1Slider = document.getElementById("mass1Slider");
+const mass2Slider = document.getElementById("mass2Slider");
 
 const length1Text = document.getElementById("length1Text");
 const length2Text = document.getElementById("length2Text");
-const massText = document.getElementById("massText");
+const mass1Text = document.getElementById("mass1Text");
+const mass2Text = document.getElementById("mass2Text");
 
 const KECtx = document.getElementById("KEGraph").getContext("2d");
 const PECtx = document.getElementById("PEGraph").getContext("2d");
@@ -21,17 +23,15 @@ const TotalECtx = document.getElementById("TotalEGraph").getContext("2d");
 const g = 9.8;
 let length1;
 let length2;
-const mass1 = 0.01;
+let mass1;
 let mass2;
-const dt = 0.001;
+const dt = 0.01;
 const scale = 100;
 
 let theta1 = Math.PI/4;
 let theta2 = Math.PI/4;
 let omega1 = 0;
 let omega2 = 0;
-let alpha1;
-let alpha2;
 let KE;
 let PE;
 
@@ -64,7 +64,6 @@ const KEChart = new Chart(KECtx, {
         }
     }
 });
-
 const PEChart = new Chart(PECtx, {
     type: 'line',
     data: {
@@ -107,8 +106,7 @@ const TotalEChart = new Chart(TotalECtx, {
         maintainAspectRatio: false,
         animation: false,
         scales: {
-            x: { 
-                display: false,
+            x: { display: false,
                 type: "linear",
                 min: 0
             },
@@ -120,24 +118,25 @@ const TotalEChart = new Chart(TotalECtx, {
 function loop(){
     length1 = parseFloat(length1Slider.value);
     length2 = parseFloat(length2Slider.value);
-    mass2 = parseFloat(massSlider.value);
+    mass1 = parseFloat(mass1Slider.value);
+    mass2 = parseFloat(mass2Slider.value);
 
     length1Text.innerText = "Length 1: " + length1 + " m";
     length2Text.innerText = "Length 2: " + length2 + " m";
-    massText.innerText = "Mass: " + mass2 + " kg";
+    mass1Text.innerText = "Blue Mass: " + mass1 + " kg";
+    mass2Text.innerText = "Black Mass: " + mass2 + " kg";
 
     if (play) {
-        calcAcceleration();
-        omega1 = omega1 + alpha1 * dt;
-        omega2 = omega2 + alpha2 * dt;
-        theta1 = theta1 + omega1 * dt;
-        theta2 = theta2 + omega2 * dt;
+        calcNewSystem();
+        
+        const v1sq = length1*length1*omega1*omega1;
+        const v2sq =
+            length1*length1*omega1*omega1 +
+            length2*length2*omega2*omega2 +
+            2*length1*length2*omega1*omega2*Math.cos(theta1-theta2);
 
-        const vx = omega1*length1*Math.cos(theta1)+omega2*length2*Math.cos(theta2);
-        const vy = omega1*length1*Math.sin(theta1)+omega2*length2*Math.sin(theta2);
-        KE = 0.5*mass2*(vx*vx+vy*vy);
-
-        PE = mass2*g*(length1*(1-Math.cos(theta1))+length2*(1-Math.cos(theta2)));
+        KE = 0.5*mass1*v1sq + 0.5*mass2*v2sq;
+        PE = mass1*g*length1*(1-Math.cos(theta1)) + mass2*g*(length1*(1-Math.cos(theta1)) +length2*(1-Math.cos(theta2)));
 
         timeStepCounter++;
         KEChart.data.labels.push(timeStepCounter);
@@ -147,6 +146,7 @@ function loop(){
             KEChart.data.labels.shift();
             KEChart.data.datasets[0].data.shift();
         }
+
         KEChart.update();
 
         PEChart.data.labels.push(timeStepCounter);
@@ -156,15 +156,18 @@ function loop(){
             PEChart.data.labels.shift();
             PEChart.data.datasets[0].data.shift();
         }
+
         PEChart.update();
 
         TotalEChart.data.datasets[0].data.push({
             x: timeStepCounter,
             y: KE + PE
         });
+
         TotalEChart.update();
+
+        
     }
-    
     const x = Math.floor(100*(length1*Math.sin(theta1)+length2*Math.sin(theta2)))/100;
     const y = Math.floor(100*(length1*(1-Math.cos(theta1))+length2*(1-Math.cos(theta2))))/100;
 
@@ -173,8 +176,9 @@ function loop(){
     const p1x = pivotx+length1*scale*Math.sin(theta1);
     const p1y = pivoty+length1*scale*Math.cos(theta1);
 
-    const p2x = p1x+length2*scale*Math.sin(theta2);
+    const p2x =p1x+length2*scale*Math.sin(theta2);
     const p2y = p1y+length2*scale*Math.cos(theta2);
+
 
     ctx.beginPath();
     ctx.fillStyle = "#ff0000";
@@ -194,7 +198,7 @@ function loop(){
 
     ctx.beginPath();
     ctx.fillStyle = "#0000ff";
-    ctx.arc(p1x,p1y,5,0,2*Math.PI);
+    ctx.arc(p1x,p1y,mass1,0,2*Math.PI);
     ctx.fill();
 
     ctx.beginPath();
@@ -206,26 +210,62 @@ function loop(){
     ctx.fillStyle = "#000000";
     ctx.fillText("("+x+","+y+")",p2x,p2y+50);
     ctx.fillStyle = "#222222";
-    ctx.arc(p2x,p2y,mass2*2,0,2*Math.PI);
+    ctx.arc(p2x,p2y,mass2,0,2*Math.PI);
     ctx.fill();
 
     requestAnimationFrame(loop);
 }
 
-function calcAcceleration(){
+function calcNewSystem(){
+    let theta1s = new Array(5);
+    theta1s[0]=theta1;
+    let theta2s = new Array(5);
+    theta2s[0]=theta2;
+    let omega1s = new Array(5);
+    omega1s[0]=omega1;
+    let omega2s = new Array(5);
+    omega2s[0]=omega2;
+    let alpha1s = new Array(4);
+    let alpha2s = new Array(4);
+
+
     const A = (mass1+mass2)*length1*length1;
-    const B = mass2*length1*length2*Math.cos(theta1-theta2);
-    const C = B;
     const D = mass2*length2*length2;
+    let B;
+    let X;
+    let Y;
+    let det;
+    let deltat;
+    for(let i = 0;i<4;i++){ 
+        B = mass2*length1*length2*Math.cos(theta1s[i]-theta2s[i]);
+        X = -(mass1+mass2)*g*length1*Math.sin(theta1s[i])- mass2*length1*length2*omega2s[i]*omega2s[i]*Math.sin(theta1s[i]-theta2s[i]);
+
+        Y = mass2*length1*length2*omega1s[i]*omega1s[i]*Math.sin(theta1s[i]-theta2s[i])- mass2*g*length2*Math.sin(theta2s[i]);
+
+        det = A*D-B*B;
+
+        alpha1s[i] = (D*X-B*Y)/det;
+        alpha2s[i] = (A*Y-B*X)/det;
+
+        if(i==0||i==1){
+            deltat = dt/2;
+        } else {
+            deltat = dt;
+        }
+
+        omega1s[i+1]= omega1 + alpha1s[i]*deltat;
+        omega2s[i+1]= omega2 + alpha2s[i]*deltat;
+        theta1s[i+1]= theta1 + omega1s[i+1]*deltat;
+        theta2s[i+1]=theta2 + omega2s[i+1]*deltat;
+    }
     
-    const X = -1*(mass1+mass2)*g*length1*Math.sin(theta1)-mass2*length1*length2*omega2*omega2*Math.sin(theta1-theta2);
-    const Y = mass2*length1*length2*omega1*omega1*Math.sin(theta1-theta2)-mass2*g*length2*Math.sin(theta2);
+    omega1 = omega1 + dt/6*(alpha1s[0]+2*alpha1s[1]+2*alpha1s[2]+alpha1s[3]);
+    omega2 = omega2 + dt/6*(alpha2s[0]+2*alpha2s[1]+2*alpha2s[2]+alpha2s[3]);
+    theta1 = theta1 + dt/6*(omega1s[0]+2*omega1s[1]+2*omega1s[2]+omega1s[3]);
+    theta2 = theta2 + dt/6*(omega2s[0]+2*omega2s[1]+2*omega2s[2]+omega2s[3]);
 
-    const det = A*D-B*C;
-
-    alpha1 = (D*X-B*Y)/det;
-    alpha2 = (-1*C*X+A*Y)/det;
 }
+
 
 playButton.addEventListener("click",function(){
     if (play){
@@ -238,7 +278,7 @@ playButton.addEventListener("click",function(){
     }
 });
 
-function reset(){
+resetButton.addEventListener("click", function(){
     let degrees = parseFloat(initTheta1.value);
     if (!isNaN(degrees)) {
         theta1 = degrees * (Math.PI / 180);
@@ -251,6 +291,7 @@ function reset(){
     
     omega1 = 0;
     omega2 = 0;
+
     timeStepCounter = 0;
 
     [KEChart, PEChart, TotalEChart].forEach(chart => {
@@ -258,18 +299,24 @@ function reset(){
         chart.data.datasets[0].data = [];
         chart.update();
     });
-}
-
-resetButton.addEventListener("click", function(){
-    reset();
 });
 
 initTheta1.addEventListener("input", function() {
-    reset();
+    let degrees = parseFloat(initTheta1.value);
+    if (!isNaN(degrees)) {
+        theta1 = degrees * (Math.PI / 180);
+        omega1 = 0;
+        omega2 = 0;
+    }
 });
 
 initTheta2.addEventListener("input", function() {
-    reset();
+    let degrees = parseFloat(initTheta2.value);
+    if (!isNaN(degrees)) {
+        theta2 = degrees * (Math.PI / 180);
+        omega1 = 0;
+        omega2 = 0;
+    }
 });
 
 loop();
